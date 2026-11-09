@@ -926,6 +926,71 @@ minimaxm31flash-fp4-mi355x-vllm-agentic-dspark:
       - { tp: 4, kv-offloading: none, spec-decoding: mtp, conc-list: [1, 2, 4, 8, 16, 32], srt-recipe: agentic.yaml }
       - { tp: 4, kv-offloading: dram, kv-offload-backend: { name: vllm-simple }, spec-decoding: mtp, conc-list: [64], srt-recipe: agentic.yaml:override_tp4_dspark3_c64_offload }
 
+# MiniMax-M3.1-Flash AgentX on MI355X with vLLM PD disaggregation over MoRI-IO RDMA WRITE
+# behind vllm-router: the mi355x_agentx_pd preset of https://recipes.vllm.ai/MiniMaxAI/MiniMax-M3.1-Flash
+# on the single-node lane's checkpoint, DSpark and caches. Host KV offload runs on the
+# prefill engine only.
+minimaxm31flash-fp4-mi355x-vllm-agentic-dspark-disagg:
+  image: vllm/vllm-openai-rocm:nightly-96710245ece8fe57a0df3ea18cdc79cbb8ce93cf@sha256:6eeac5c66fa566c8f44f79528df9db5eaadff6cc4afb76ad583fedfd5b64e51b
+  model: amd/MiniMax-M3.1-Flash-Quark-MXFP4
+  model-prefix: minimaxm31flash
+  runner: cluster:mi355x-amds
+  precision: fp4
+  framework: vllm
+  router: { name: vllm-router, version: "0.1.16" }
+  kv-p2p-transfer: moriio
+  multinode: true
+  disagg: true
+  srt-recipe-dir: minimaxm31flash/vllm/mi355x-fp4/agentx
+  scenarios:
+    agentic-coding:
+    - dram-utilization: 0.9
+      search-space:
+      - spec-decoding: mtp
+        kv-offloading: dram
+        kv-offload-backend: { name: vllm-simple }
+        conc-list: [40]
+        srt-recipe: disagg-variants.yaml:override_c40
+        prefill: { num-worker: 1, tp: 4, ep: 1, dp-attn: false }
+        decode: { num-worker: 2, tp: 4, ep: 1, dp-attn: false }
+      - spec-decoding: mtp
+        kv-offloading: dram
+        kv-offload-backend: { name: vllm-simple }
+        conc-list: [48]
+        srt-recipe: disagg-variants.yaml:override_c48
+        prefill: { num-worker: 1, tp: 4, ep: 1, dp-attn: false }
+        decode: { num-worker: 2, tp: 4, ep: 1, dp-attn: false }
+      - spec-decoding: mtp
+        kv-offloading: dram
+        kv-offload-backend: { name: vllm-simple }
+        conc-list: [64]
+        srt-recipe: disagg-variants.yaml:override_c64
+        prefill: { num-worker: 1, tp: 4, ep: 1, dp-attn: false }
+        decode: { num-worker: 2, tp: 4, ep: 1, dp-attn: false }
+    - dram-utilization: 1.0
+      search-space:
+      - spec-decoding: mtp
+        kv-offloading: dram
+        kv-offload-backend: { name: vllm-simple }
+        conc-list: [96]
+        srt-recipe: disagg-variants.yaml:override_c96
+        prefill: { num-worker: 1, tp: 4, ep: 1, dp-attn: false }
+        decode: { num-worker: 2, tp: 4, ep: 1, dp-attn: false }
+      - spec-decoding: mtp
+        kv-offloading: dram
+        kv-offload-backend: { name: vllm-simple }
+        conc-list: [112]
+        srt-recipe: disagg-variants.yaml:override_c112
+        prefill: { num-worker: 1, tp: 4, ep: 1, dp-attn: false }
+        decode: { num-worker: 2, tp: 4, ep: 1, dp-attn: false }
+      - spec-decoding: mtp
+        kv-offloading: dram
+        kv-offload-backend: { name: vllm-simple }
+        conc-list: [128]
+        srt-recipe: disagg-variants.yaml:override_c128
+        prefill: { num-worker: 1, tp: 4, ep: 1, dp-attn: false }
+        decode: { num-worker: 2, tp: 4, ep: 1, dp-attn: false }
+
 kimik3.1-fp4-mi355x-vllm-agentic-dspark:
   image: vllm/vllm-openai-rocm:kimi-k31@sha256:5f47cc1004d9a7ac65f8a913725edb20c62c99a07e31cbf4ba21741bd0b4f9b1
   model: moonshotai/Kimi-K3.1-Pro

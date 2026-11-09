@@ -12606,3 +12606,12 @@
     - "Disaggregated: add musespark-fp4-gb300-dynamo-sglang-agentic-dflash-disagg with TP8 prefill and TP8 decode workers: 1P2D at c160 and c224, 1P3D at c224, 1P4D at c32, c56 and c112, 1P5D at c120, 2P3D at c352 and 3P4D at c672. Mooncake KV transfer and prefill HiCache (150 GB per rank, 0.80 DRAM utilization)."
     - "Remove musespark-fp4-gb300-dynamo-sglang-agentic-dflash (TP4 c8, c16, c20, c32 and c40 and TP8 c3, c4, c10 and c14 on the dev-muse-spark-open image)."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4757
+
+- config-keys:
+    - minimaxm31flash-fp4-mi355x-vllm-agentic-dspark-disagg
+  scenario-type: [agentic-coding]
+  description:
+    - "Add MiniMax-M3.1-Flash PD-disaggregated AgentX on MI355X with vLLM: TP4 prefill and decode engines moving KV over MoRI-IO RDMA WRITE behind vllm-router 0.1.16 with consistent-hash routing, at concurrency 40, 48, 64, 96, 112 and 128. Seven-token DSpark, NVFP4 KV and indexer caches, and a host KV tier on the prefill engine (1349 GB at c40-c64, 1499 GB at c96-c128)."
+    - "Use vllm/vllm-openai-rocm:nightly-96710245ece8fe57a0df3ea18cdc79cbb8ce93cf, which includes vllm-project/vllm#65822 (MoRI-IO WRITE skips the blocks the decoder's prefix cache already holds)."
+    - "Carry runners/srt-slurm/patches/662-moriio-discovery-read-mode.patch so the vLLM Router discovery template can select read_mode false."
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4973
